@@ -5,24 +5,10 @@
         <meta name="description" content="">
         
         <style type='text/css'>
-        section#page-contain {
-            width: 800px;
-            margin: 0 auto;
-        }
-        
-        header {
-            width: 350px;
-            margin: 0 auto;
-            text-align: center;
-        }
-        
-        footer {
-            text-decoration: italic;
-        }
-        
-        canvas#legba {
-            border: 2px solid #e9e9e9;
-        }
+        section#page-contain { width: 800px; margin: 0 auto; }
+        header { width: 350px; margin: 0 auto; text-align: center; }
+        footer { text-decoration: italic; }
+        canvas#legba { border: 2px solid #e9e9e9; }
         </style>
         
         <!-- replace localhost with server name -->
@@ -34,7 +20,7 @@
         
         <script type='text/javascript'>      
         var legbaCli = function() { 
-            var canv = $('#legba')[0];
+            var canv = $('canvas#legba')[0];
             var ctx = canv.getContext('2d');
             var scrWidth = $(canv).attr('width');
             var scrHeight = $(canv).attr('height');
@@ -67,7 +53,8 @@
                 
                 console.log('canvas clicked @: ' 
                     + (ev.pageX - ev.target.offsetLeft) + ',' + 
-                    + (ev.pageY - ev.target.offsetTop) + ' on ' + ev.timeStamp);
+                    + (ev.pageY - ev.target.offsetTop) + ' on ' + 
+                    ev.timeStamp);
                 
                 con.emit('click', {
                     x: (ev.pageX - ev.target.offsetLeft),
