@@ -55,36 +55,36 @@
                 ctx.fillText('Server socket created OK', 30, 60);
             
                 con.on('new', function() {
-                        console.log('got new connection on server.');
-                        con.emit('message', 'hello again!');
-                    });
+                    console.log('got new connection on server.');
+                    con.emit('message', 'hello again!');
+                });
             });
              
             /* event callbacks */
 
             $(canv).click(function(ev) {
                 ev.preventDefault();
-                console.log('canvas clicked @: ' 
-                + ev.pageX + ',' + ev.pageY + ' on ' + ev.timeStamp);
                 
-                /* send click to the server */
+                console.log('canvas clicked @: ' 
+                    + (ev.pageX - ev.target.offsetLeft) + ',' + 
+                    + (ev.pageY - ev.target.offsetTop) + ' on ' + ev.timeStamp);
+                
+                con.emit('click', {
+                    x: (ev.pageX - ev.target.offsetLeft),
+                    y: (ev.pageY - ev.target.offsetTop),
+                    t: ev.timeStamp
+                });
             });         
             $(document).keydown(function(ev) {
                 ev.preventDefault();
-                
                 console.log('key down: ' + ev.which + ' @ ' + ev.timeStamp);
-                
-                /* send keypress to the server */
+                con.emit('keydown', { k: ev.which });
             });
             $(document).keyup(function(ev) {
-            
                 ev.preventDefault();
-                
                 console.log('key up: ' + ev.which + ' @ ' + ev.timeStamp);
-                /* send keypress to the server */
+                con.emit('keyup', { k: ev.which });
             });
-            
-
         } /* legbaCli */
         
         $(document).ready(function() {
