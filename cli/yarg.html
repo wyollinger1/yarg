@@ -25,52 +25,50 @@
         }
         </style>
         
+        <!-- replace localhost with server name -->
         <script src="http://localhost/socket.io/socket.io.js"></script>
         <script 
             type='text/javascript'
             src='http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js'>
         </script>
         
-        <script type='text/javascript'>
-            var con = io.connect('http://localhost/');
- 
-            con.on('connect', function() {
-                console.log('handshake initiated, sending message');
-                con.emit('message', 'hello to server from client');
-            
-                con.on('new', function() {
-                    console.log('got new connection on server.');
-                    con.emit('message', 'hello again!');
-                });
-            });
-        
-            $(document).ready(function() {
-                console.log('client side loaded booting...');
-                legbaInit();
-            });
-            
-            function legbaInit() {
+        <script type='text/javascript'>      
+        var legbaCli = function() { 
             var canv = $('#legba')[0];
             var ctx = canv.getContext('2d');
             var scrWidth = $(canv).attr('width');
             var scrHeight = $(canv).attr('height');
-            
+            var con = io.connect('http://localhost/'); /* switch to server name */
+ 
             console.log('canvas initialized with size ' +
                 scrWidth + ' by ' + scrHeight + ' and context ' + ctx );
             
-            ctx.fillText('Status: Canvas API loaded OK', 30, 30);
+            ctx.fillText('Canvas API loaded OK', 30, 30);
             
-            $(canv).focus();
+            $(canv).focus(); /* acquire focus */
+            
+            /* websocket callbacks */
+            
+            con.on('connect', function() {
+                console.log('handshake initiated, sending message');
+                con.emit('message', 'hello to server from client');
+                ctx.fillText('Server socket created OK', 30, 60);
+            
+                con.on('new', function() {
+                        console.log('got new connection on server.');
+                        con.emit('message', 'hello again!');
+                    });
+            });
+             
             /* event callbacks */
-            
+
             $(canv).click(function(ev) {
                 ev.preventDefault();
                 console.log('canvas clicked @: ' 
                 + ev.pageX + ',' + ev.pageY + ' on ' + ev.timeStamp);
                 
                 /* send click to the server */
-            });
-            
+            });         
             $(document).keydown(function(ev) {
                 ev.preventDefault();
                 
@@ -78,14 +76,21 @@
                 
                 /* send keypress to the server */
             });
-            
             $(document).keyup(function(ev) {
+            
                 ev.preventDefault();
                 
                 console.log('key up: ' + ev.which + ' @ ' + ev.timeStamp);
                 /* send keypress to the server */
             });
-        }
+            
+
+        } /* legbaCli */
+        
+        $(document).ready(function() {
+            console.log('client side loaded booting...');
+            legbaCli();
+        });
         </script>
     </head>
     <body>
