@@ -42,6 +42,9 @@
             var scrWidth = $(canv).attr('width');
             var scrHeight = $(canv).attr('height');
             var con = io.connect('http://localhost/'); /* switch to server name */
+            var login = $('form#login');
+            /*Placeholder submit killer until websocket is set up*/
+            login.on('submit', function(evt){evt.preventDefault(); return false;});
  
             console.log('canvas initialized with size ' +
                 scrWidth + ' by ' + scrHeight + ' and context ' + ctx );
@@ -61,6 +64,20 @@
                     console.log('got new connection on server.');
                     con.emit('message', 'hello again!');
                 });
+                login.off('submit');
+                login.on('submit', function(evt){
+                  evt.preventDefault();
+                  var data = $(this).serializeArray(), reply={};
+                  for(var i = 0; i<data.length; i++){
+                    reply[data[i].name]=data[i].value;
+                  }
+                  con.emit('login', JSON.stringify(reply));
+                  return false
+                });
+                con.on('login', function(res) {
+                  ctx.clearRect(30, 61, 200, 35);
+                  ctx.fillText(res.msg, 30, 90, 200);
+                  });
             });
              
             /* event callbacks */
@@ -78,17 +95,24 @@
                     y: (ev.pageY - ev.target.offsetTop),
                     t: ev.timeStamp
                 });
-            });         
-            $(document).keydown(function(ev) {
-                ev.preventDefault();
-                console.log('key down: ' + ev.which + ' @ ' + ev.timeStamp);
-                con.emit('keydown', { k: ev.which });
             });
-            $(document).keyup(function(ev) {
-                ev.preventDefault();
-                console.log('key up: ' + ev.which + ' @ ' + ev.timeStamp);
-                con.emit('keyup', { k: ev.which });
+            $(canv).focus(function(ev){
+                $(document).keydown(function(ev) {
+                  ev.preventDefault();
+                  console.log('key down: ' + ev.which + ' @ ' + ev.timeStamp);
+                  con.emit('keydown', { k: ev.which });
+                });
+                $(document).keyup(function(ev) {
+                  ev.preventDefault();
+                  console.log('key up: ' + ev.which + ' @ ' + ev.timeStamp);
+                  con.emit('keyup', { k: ev.which });
+                });
             });
+            $(canv).blur(function(ev){
+                $(document).off('keydown');
+                $(document).off('keyup');
+            });
+
         } /* legbaCli */
         
         $(document).ready(function() {
@@ -105,9 +129,14 @@
         </header>
       
             <section>
-                <canvas id='legba' width='800' height='494'>
+                <canvas id='legba' width='800' height='494' tabindex='0'>
                     Your browser does not support the HTML5 canvas element.
                 </canvas>
+                <form id='login'>
+                  <input type='text' name='username' />
+                  <input type='password' name='password' />
+                  <input type='submit' value='Login' />
+                </form>
                 <noscript>
                     You need to enable javascript to use this website.
                 </noscript>

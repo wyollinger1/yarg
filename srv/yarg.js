@@ -16,27 +16,48 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 var io = require('socket.io').listen(80);
+var stream = require('./stream.js');
 
 io.sockets.on('connection', function(socket) {
     io.sockets.emit('new', { msg: 'new client connected'});
-
-    socket.on('message', function(msg) {
-        console.log('server received message', msg);
-    });
-    
-    socket.on('disconnect', function() {
-        console.log('client disconnected');
-    });
-    
-    socket.on('click', function(msg) {
-        console.log('click: ', msg);
-    });
-    
-    socket.on('keydown', function(msg) {
-       console.log('keydown: ', msg);
-    });
-    
-    socket.on('keyup', function(msg) {
-       console.log('keyup: ', msg);
-    });
+    var user=stream.createUser()
+    socket.on('login', function(msg) {
+      var login;
+      try{
+        login= JSON.parse(msg)
+      }catch(err){
+        socket.emit('login', {msg: "Unrecognized login format"});
+        return
+      }
+      user.login(login.username, login.password, function(err, user){
+        if(user.id==null){
+          socket.emit('login', {msg: "Failure, no matching username and password"+user.id});
+          return
+        }
+        socket.emit('login', {msg: "Logged in as " + login.username});
+      });
+  });
 });
+function setUp(socket){
+  /* Set up rest of API */
+  socket.on('message', function(msg) {
+      console.log('server received message', msg);
+  });
+    
+  socket.on('disconnect', function() {
+    console.log('client disconnected');
+  });
+
+  socket.on('click', function(msg) {
+    console.log('click: ', msg);
+  });
+
+  socket.on('keydown', function(msg) {
+    console.log('keydown: ', msg);
+  });
+
+  socket.on('keyup', function(msg) {
+    console.log('keyup: ', msg);
+  });
+}
+
